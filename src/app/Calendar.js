@@ -155,6 +155,10 @@ function Calendar() {
         ) : (
           <p>Select an event to see more information.</p>
         )}
+        <div className="comapatible_classes">
+        <p> Do you want to see if you have free time for any clubs available at Umass Boston? Click this button to see if you are compatible with any on-campus events.</p>
+        <button>Make Suggestions</button>
+        </div>
       </div>
     </div>
   );
