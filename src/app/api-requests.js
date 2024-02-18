@@ -23,22 +23,23 @@ async function fetchEvents(query) {
     )
   
     const responseData = await response.json();
-    console.log(responseData);
-    return responseData;
+    // console.log(responseData.value[3].id);
+    // return responseData;
 
 
-    // const eventsDetails = jsonData.value.map(event => ({
-    //   startsOn: event.startsOn,
-    //   endsOn: event.endsOn,
-    //   theme: event.theme,
-    //   OrganizationName: event.OrganizationName,
-    //   location: event.location
-    // }));
+    const eventsDetails = responseData.value.map(event => ({
+      id: event.id,
+      startsOn: event.startsOn,
+      endsOn: event.endsOn,
+      theme: event.theme,
+      OrganizationName: event.OrganizationName,
+      location: event.location
+    }));
       
-      
-    //   const event = eventsDetails[0];
-    //   console.log(`Event ID: ${event.id}, Starts On: ${event.startsOn}, Ends On: ${event.endsOn}, Theme: ${event.theme}, Organization: ${event.OrganizationName}, Location: ${event.location}`);
-      
+      for (let i = 0; i < eventsDetails.length; i++) {
+      const event = eventsDetails[i];
+      console.log(`Event ID: ${event.id}, startsOn: ${event.startsOn}`, `endsOn: ${event.endsOn}`, `theme: ${event.theme}`, `OrganizationName: ${event.OrganizationName}`, `location: ${event.location}`);
+      }
     // return eventsDetails;
 }
 
