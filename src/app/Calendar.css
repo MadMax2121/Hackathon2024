@@ -1,18 +1,4 @@
-/* Calendar.css */
-.calendar-container {
-  width: 80vw;
-  position: relative;
-}
-
-.event-details-popup {
-  position: absolute;
-  background-color: #fff;
-  border: 1px solid #000;
-  padding: 10px;
-  border-radius: 5px;
-  z-index: 100;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+/* Calendar.css Updates */
 
 .calendar-container {
   display: flex;
@@ -34,17 +20,16 @@
 }
 
 .event-info-container {
-  position: fixed; /* Make the position fixed relative to the viewport */
-  top: 0; /* Align the top of the container with the top of the viewport */
-  right: 0; /* Align the container to the right side of the viewport */
-  width: 16vw;
-  height: fit-content; /* Adjusted to take full viewport height minus any header if present */
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 20vw; /* Adjusted for consistency */
+  height: 100vh;
   padding: 20px;
   border-left: 1px solid #ccc;
   background-color: #f9f9f9;
   overflow-y: auto;
   z-index: 100;
-  height: 100vh;
 }
 
 .import-button {
@@ -54,35 +39,35 @@
   padding: 10px 20px;
   margin-bottom: 10px;
   cursor: pointer;
-  transition: transform 0.2s ease-in-out; /* Smooth scaling transition */
+  transition: transform 0.2s ease-in-out;
 }
 
 .import-button:hover {
-  transform: scale(1.1); /* Scale the button on hover */
+  transform: scale(1.1);
 }
 
-.comapatible_classes {
-    margin-top: 100px;
-    border: 2px solid black;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+.compatible_classes {
+  margin-top: 20px; /* Adjusted spacing */
+  border: 2px solid #2c3e50; /* Color adjusted to match button */
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0; /* Light background for contrast */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
 }
 
-.comapatible_classes > button {
-background-color: #2c3e50;;
+.compatible_classes > button {
+  background-color: #2c3e50;
   color: white;
   border: none;
   padding: 10px 20px;
-  margin-bottom: 10px;
+  margin-top: 10px; /* Adjusted margin */
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
-  
-    
 }
 
-.comapatible_classes > button:hover {
-    transform: scale(1.1)
+.compatible_classes > button:hover {
+  transform: scale(1.1);
 }
