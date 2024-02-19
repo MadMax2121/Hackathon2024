@@ -1,5 +1,5 @@
-'use client'
-import React, { useState } from "react";
+'use client';
+import React, { useState, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -7,11 +7,102 @@ import interactionPlugin from "@fullcalendar/interaction";
 import * as ical from "ical.js";
 import { parseISO, add, format } from "date-fns";
 import { RRule } from "rrule";
-import './Calendar.css'; // Make sure to have Calendar.css in the same directory
+import './Calendar.css'; 
 
-function Calendar() {
-  const [events, setEvents] = useState([]);
+function Calendar({ events, updateEvents }) {
+ 
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const isEventCompatible = (existingEvents, newEvent) => {
+    return existingEvents.every(existingEvent => 
+      new Date(newEvent.end).getTime() <= new Date(existingEvent.start).getTime() ||
+      new Date(newEvent.start).getTime() >= new Date(existingEvent.end).getTime()
+    );
+  };
+
+  const combineEventsBasedOnAvailability = (existingEvents, dummyEvents) => {
+    const transformedDummyEvents = dummyEvents.map(de => ({
+      title: de.name,
+      start: de.date,
+      end: new Date(new Date(de.date).getTime() + 2 * 60 * 60 * 1000).toISOString(), // Adding 2 hours to start time for end time
+      location: de.theme, // Assuming theme can be repurposed as location
+      color: 'red' // Marking compatible events with red color
+    }));
+
+    const compatibleEvents = transformedDummyEvents.filter(newEvent => 
+      isEventCompatible(existingEvents, newEvent)
+    );
+
+    return [...existingEvents, ...compatibleEvents];
+  };
+
+  const generateCompatibleDummyEvents = () => {
+    // Predefined list of 10 club names
+    const clubNames = [
+      "Astronomy Club",
+      "Debate Team",
+      "Coding Society",
+      "Eco Warriors",
+      "Chess Club",
+      "Robotics Team",
+      "Literature Circle",
+      "Math League",
+      "Science Club",
+      "Art Collective"
+    ];
+  
+    let dummyEvents = [];
+    for (let i = 1; i <= 10; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() + i); // Each event is set on a consecutive day
+      
+      // Add a random hour between 8 AM and 5 PM (for example)
+      const randomHour = Math.floor(Math.random() * (17 - 8 + 1) + 8);
+      date.setHours(randomHour, 0, 0, 0); // Set minutes, seconds, and milliseconds to 0
+  
+      // Select a random club name from the list
+      const randomClubNameIndex = Math.floor(Math.random() * clubNames.length);
+      const clubName = clubNames[randomClubNameIndex];
+      
+      dummyEvents.push({
+        id: i,
+        name: clubName,
+        date: date.toISOString(),
+         // You might want to adjust or remove this, depending on your use case
+      });
+    }
+    return dummyEvents;
+  };
+  
+  
+
+  const handleSubmit = () => {
+    const dummyEvents = generateCompatibleDummyEvents();
+    const updatedEvents = combineEventsBasedOnAvailability(events, dummyEvents);
+    updateEvents(updatedEvents); // This should update the state with new events, including compatible ones marked in red
+  };
+
+  const handleFileChange = (event) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      parseIcsEvents(e.target.result);
+    };
+    reader.readAsText(event.target.files[0]);
+  };
+
+  const handleEventClick = (clickInfo) => {
+    setSelectedEvent({
+      title: clickInfo.event.title,
+      start: format(new Date(clickInfo.event.startStr), "p"),
+      end: format(new Date(clickInfo.event.endStr), "p"),
+      location: clickInfo.event.extendedProps.location,
+    });
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
+  };
 
   const parseIcsEvents = (data) => {
     try {
@@ -23,18 +114,9 @@ function Calendar() {
       const generationEndDate = add(generationStartDate, { years: 1 });
 
       const vevents = comp.getAllSubcomponents("vevent");
-      if (!vevents || !vevents.length) {
-        console.error("No VEVENT found in the ICS data.");
-        return;
-      }
-
       vevents.forEach((event) => {
         const dtstartProp = event.getFirstPropertyValue("dtstart");
         const dtendProp = event.getFirstPropertyValue("dtend");
-        if (!dtstartProp || !dtendProp) {
-          console.error("Event start or end date is missing.");
-          return;
-        }
         const eventStart = dtstartProp.toJSDate();
         const eventEnd = dtendProp.toJSDate();
         const summary = event.getFirstPropertyValue("summary");
@@ -43,7 +125,7 @@ function Calendar() {
 
         let title = summary;
         if (location) {
-          title += ` (${location})`; // Include location in the title if available
+          title += ` (${location})`;
         }
 
         if (rruleProp) {
@@ -75,38 +157,10 @@ function Calendar() {
         }
       });
 
-      allEvents.sort((a, b) => a.start - b.start);
-      setEvents(allEvents.map((event) => ({
-        ...event,
-        start: event.start.toISOString(),
-        end: event.end.toISOString(),
-      })));
+      updateEvents(allEvents); // Assuming updateEvents is the method to update your event state
     } catch (error) {
-      console.error("Error parsing ICS file:", error);
+      console.error("Error parsing ICS:", error);
     }
-  };
-
-  const handleFileChange = (event) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      parseIcsEvents(e.target.result);
-    };
-    reader.readAsText(event.target.files[0]);
-  };
-
-  const handleEventClick = (clickInfo) => {
-    setSelectedEvent({
-      title: clickInfo.event.title,
-      start: format(new Date(clickInfo.event.startStr), "p"), // Format time
-      end: format(new Date(clickInfo.event.endStr), "p"), // Format time
-      location: clickInfo.event.extendedProps.location,
-    });
-  };
-
-  const fileInputRef = React.createRef(); // Create a ref for the file input
-
-  const handleButtonClick = () => {
-    fileInputRef.current.click(); // Trigger file input click on button click
   };
 
   return (
@@ -120,7 +174,7 @@ function Calendar() {
             onChange={handleFileChange}
             accept=".ics"
             ref={fileInputRef}
-            style={{ display: 'none' }} // Hide the actual file input
+            style={{ display: 'none' }}
           />
         </div>
         <FullCalendar
@@ -145,19 +199,17 @@ function Calendar() {
       </div>
       <div className="event-info-container">
         <h2>Event Information</h2>
-        {selectedEvent ? (
+        {selectedEvent && (
           <div>
             <h3>{selectedEvent.title}</h3>
             <p>Start: {selectedEvent.start}</p>
             <p>End: {selectedEvent.end}</p>
             {selectedEvent.location && <p>Location: {selectedEvent.location}</p>}
           </div>
-        ) : (
-          <p>Select an event to see more information.</p>
         )}
-        <div className="comapatible_classes">
-        <p> Do you want to see if you have free time for any clubs available at Umass Boston? Click this button to see if you are compatible with any on-campus events.</p>
-        <button>Make Suggestions</button>
+        <div className="compatible_classes">
+          <p>Do you want to see if you have free time for any clubs available at Umass Boston? Click this button to see if you are compatible with any on-campus events.</p>
+          <button onClick={handleSubmit}>Make Suggestions</button>
         </div>
       </div>
     </div>
