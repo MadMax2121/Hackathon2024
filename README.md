@@ -1,5 +1,6 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Here is a path to the example file you can use to import a calendar: /public/example-calendar.ics
 
+Deployed link: https://calendarcompatibility.vercel.app/
 ## Getting Started
 
 First, run the development server:
